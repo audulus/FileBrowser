@@ -10,6 +10,7 @@ This is far from complete, but I will be using it in both of my already-released
 
 ```swift
 
+@main
 struct MyApp: App {
     @State var editing: URL?
     
