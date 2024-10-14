@@ -37,7 +37,6 @@ class FileBrowserModel {
 
         while let url = enumerator?.nextObject() as? URL {
             if url.pathExtension == pathExtension {
-                // print("found sculptura document: \(url)")
                 urls.append(url)
             }
         }
