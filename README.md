@@ -5,3 +5,18 @@
 This is far from complete, but I will be using it in both of my already-released apps and one upcoming app.
 
 ![Screenshot](screenshot.png)
+
+## Usage
+
+```swift
+         // @State var editing: URL?
+         WindowGroup {
+            ZStack {
+                if let editing {
+                    RootView(editing: $editing)
+                } else {
+                    FileBrowserView(editing: $editing, utType: UTType("com.yourcompany.yourformat")!)
+                }
+            }
+        }
+```
