@@ -1,18 +1,21 @@
 //  Copyright © 2024 Audulus LLC. All rights reserved.
 
 import SwiftUI
+import UniformTypeIdentifiers
 
 #if os(iOS)
 
 public struct FileBrowserView: View {
 
-    @State var model = FileBrowserModel()
+    @State var model: FileBrowserModel?
+    let utType: UTType
     @State var isImporting = false
     @Binding var editing: URL?
     @State var showDeleteAlert = false
 
-    public init(editing: Binding<URL?>) {
+    public init(editing: Binding<URL?>, utType: UTType) {
         _editing = editing
+        self.utType = utType
     }
 
     let columns = [
@@ -21,7 +24,7 @@ public struct FileBrowserView: View {
 
     func newDocument() {
         do {
-            try model.newDocument()
+            try model?.newDocument()
         } catch {
             print("⚠️ error creating new document: \(error)")
         }
@@ -33,7 +36,7 @@ public struct FileBrowserView: View {
 
     func deleteSelected() {
         do {
-            try model.deleteSelected()
+            try model?.deleteSelected()
         } catch {
             print("⚠️ error deleting selected items: \(error)")
         }
@@ -41,58 +44,61 @@ public struct FileBrowserView: View {
 
     func duplicateSelected() {
         do {
-            try model.duplicateSelected()
+            try model?.duplicateSelected()
         } catch {
             print("⚠️ error duplicating selected items: \(error)")
         }
     }
 
     func deactivateSelection() {
-        model.selecting = false
-        model.selected = .init()
+        model?.selecting = false
+        model?.selected = .init()
     }
 
     public var body: some View {
         ZStack(alignment: .top) {
 
-            ScrollView {
-                LazyVGrid(columns: columns) {
-                    ForEach(model.urls, id: \.self) { url in
-                        BrowserItemView(model: model,
-                                        item: url,
-                                        itemSelected: select)
+            if let model {
+                ScrollView {
+                    LazyVGrid(columns: columns) {
+                        ForEach(model.urls, id: \.self) { url in
+                            BrowserItemView(model: model,
+                                            item: url,
+                                            itemSelected: select)
                             .padding(40)
+                        }
                     }
+                    .safeAreaPadding(EdgeInsets(top: 80, leading: 0, bottom: 0, trailing: 0))
                 }
-                .safeAreaPadding(EdgeInsets(top: 80, leading: 0, bottom: 0, trailing: 0))
-            }
 
-            HStack(spacing: 20) {
-                if let appName = Bundle.main.infoDictionary?[kCFBundleNameKey as String] as? String {
-                    Text(appName)
-                        .font(.title)
+                HStack(spacing: 20) {
+                    if let appName = Bundle.main.infoDictionary?[kCFBundleNameKey as String] as? String {
+                        Text(appName)
+                            .font(.title)
+                    }
+                    Spacer()
+                    if model.selecting {
+                        Button(action: duplicateSelected) {
+                            Text("Duplicate")
+                        }
+                        Button(action: { showDeleteAlert = true }) {
+                            Text("Delete")
+                        }
+                        CustomToolbarButton(image: Image(systemName: "multiply"), action: deactivateSelection)
+                    } else {
+                        Button(action: { model.selecting = true }) {
+                            Text("Select")
+                        }
+                        Button(action: { isImporting = true}) {
+                            Text("Import")
+                        }
+                        CustomToolbarButton(image: Image(systemName: "plus"), action: newDocument)
+                    }
                 }
-                Spacer()
-                if model.selecting {
-                    Button(action: duplicateSelected) {
-                        Text("Duplicate")
-                    }
-                    Button(action: { showDeleteAlert = true }) {
-                        Text("Delete")
-                    }
-                    CustomToolbarButton(image: Image(systemName: "multiply"), action: deactivateSelection)
-                } else {
-                    Button(action: { model.selecting = true }) {
-                        Text("Select")
-                    }
-                    Button(action: { isImporting = true}) {
-                        Text("Import")
-                    }
-                    CustomToolbarButton(image: Image(systemName: "plus"), action: newDocument)
-                }
+                .padding()
+                .background(BlurView(style: .dark))
+
             }
-            .padding()
-            .background(BlurView(style: .dark))
         }
         .background(Color("BrowserBackground"))
         .foregroundStyle(.white)
@@ -101,14 +107,17 @@ public struct FileBrowserView: View {
             Button("Cancel", role: .cancel) { }
         }
         .fileImporter(isPresented: $isImporting,
-                      allowedContentTypes: [model.utType]) { result in
+                      allowedContentTypes: [utType]) { result in
             switch result {
             case .success(let url):
-                model.importFile(at: url)
+                model?.importFile(at: url)
             case .failure(let error):
                 // handle error
                 print(error)
             }
+        }
+        .onAppear {
+            model = FileBrowserModel(utType: utType)
         }
     }
 }
@@ -139,7 +148,7 @@ struct BlurView: UIViewRepresentable {
 }
 
 #Preview {
-    FileBrowserView(editing: .constant(nil))
+    FileBrowserView(editing: .constant(nil), utType: UTType.png)
 }
 
 #endif

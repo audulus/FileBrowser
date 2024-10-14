@@ -11,13 +11,14 @@ class FileBrowserModel {
     var selected = Set<URL>()
     var selecting = false
     let pathExtension = "sculptura"
-    let utType = UTType("com.halfspace.sculptura")!
+    let utType: UTType
 
     enum Error: Swift.Error {
         case noDocumentsDirectory
     }
 
-    init() {
+    init(utType: UTType) {
+        self.utType = utType
         scan()
     }
 
