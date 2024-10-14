@@ -15,7 +15,10 @@ This is far from complete, but I will be using it in both of my already-released
                 if let editing {
                     RootView(editing: $editing)
                 } else {
-                    FileBrowserView(editing: $editing, utType: UTType("com.yourcompany.yourformat")!)
+                    FileBrowserView(editing: $editing,
+                                    utType: UTType("com.yourcompany.yourformat")!
+                                    pathExtension: "myextension",
+                                    newDocumentURL: Bundle.main.url(forResource: "New Document", withExtension: "myextension")!)
                 }
             }
         }
