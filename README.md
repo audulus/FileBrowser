@@ -9,7 +9,11 @@ This is far from complete, but I will be using it in both of my already-released
 ## Usage
 
 ```swift
-         // @State var editing: URL?
+
+struct MyApp: App {
+    @State var editing: URL?
+    
+    var scene: some Scene {
          WindowGroup {
             ZStack {
                 if let editing {
@@ -22,4 +26,6 @@ This is far from complete, but I will be using it in both of my already-released
                 }
             }
         }
+    }
+}
 ```
