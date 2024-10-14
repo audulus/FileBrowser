@@ -12,14 +12,16 @@ class FileBrowserModel {
     var selecting = false
     let pathExtension: String
     let utType: UTType
+    let newDocumentURL: URL
 
     enum Error: Swift.Error {
         case noDocumentsDirectory
     }
 
-    init(utType: UTType, pathExtension: String) {
+    init(utType: UTType, pathExtension: String, newDocumentURL: URL) {
         self.utType = utType
         self.pathExtension = pathExtension
+        self.newDocumentURL = newDocumentURL
         scan()
     }
 
@@ -99,10 +101,8 @@ class FileBrowserModel {
 
     func newDocument() throws {
         let mgr = FileManager.default
-        let url = Bundle.main.url(forResource: "Sphere-128", withExtension: "sculptura")!
-
         let destUrl = try getFileURL(base: "Untitled")
-        try mgr.copyItem(at: url, to: destUrl)
+        try mgr.copyItem(at: newDocumentURL, to: destUrl)
 
         scan()
     }

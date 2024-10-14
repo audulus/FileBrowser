@@ -7,18 +7,20 @@ import UniformTypeIdentifiers
 
 public struct FileBrowserView: View {
 
+    @Binding var editing: URL?
     let utType: UTType
     let pathExtension: String
-    @Binding var editing: URL?
+    let newDocumentURL: URL
 
     @State private var model: FileBrowserModel?
     @State private var isImporting = false
     @State private var showDeleteAlert = false
 
-    public init(editing: Binding<URL?>, utType: UTType, pathExtension: String) {
+    public init(editing: Binding<URL?>, utType: UTType, pathExtension: String, newDocumentURL: URL) {
         _editing = editing
         self.utType = utType
         self.pathExtension = pathExtension
+        self.newDocumentURL = newDocumentURL
     }
 
     let columns = [
@@ -120,7 +122,7 @@ public struct FileBrowserView: View {
             }
         }
         .onAppear {
-            model = FileBrowserModel(utType: utType, pathExtension: pathExtension)
+            model = FileBrowserModel(utType: utType, pathExtension: pathExtension, newDocumentURL: newDocumentURL)
         }
     }
 }
@@ -151,7 +153,7 @@ struct BlurView: UIViewRepresentable {
 }
 
 #Preview {
-    FileBrowserView(editing: .constant(nil), utType: UTType.png, pathExtension: "png")
+    FileBrowserView(editing: .constant(nil), utType: UTType.png, pathExtension: "png", newDocumentURL: URL(fileURLWithPath: "/tmp/test.png"))
 }
 
 #endif
