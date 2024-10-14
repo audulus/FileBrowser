@@ -4,12 +4,16 @@ import SwiftUI
 
 #if os(iOS)
 
-struct FileBrowserView: View {
+public struct FileBrowserView: View {
 
     @State var model = FileBrowserModel()
     @State var isImporting = false
     @Binding var editing: URL?
     @State var showDeleteAlert = false
+
+    public init(editing: Binding<URL?>) {
+        _editing = editing
+    }
 
     let columns = [
         GridItem(.adaptive(minimum: 250))
@@ -48,7 +52,7 @@ struct FileBrowserView: View {
         model.selected = .init()
     }
 
-    var body: some View {
+    public var body: some View {
         ZStack(alignment: .top) {
 
             ScrollView {
