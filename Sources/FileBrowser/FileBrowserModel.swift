@@ -10,15 +10,16 @@ class FileBrowserModel {
     var urls: [URL] = []
     var selected = Set<URL>()
     var selecting = false
-    let pathExtension = "sculptura"
+    let pathExtension: String
     let utType: UTType
 
     enum Error: Swift.Error {
         case noDocumentsDirectory
     }
 
-    init(utType: UTType) {
+    init(utType: UTType, pathExtension: String) {
         self.utType = utType
+        self.pathExtension = pathExtension
         scan()
     }
 
