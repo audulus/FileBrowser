@@ -62,6 +62,16 @@ public struct FileBrowserView: View {
         model?.selected = .init()
     }
 
+    func openDocuments() {
+        if let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+
+            let path = documentsDirectory.absoluteString.replacingOccurrences(of: "file://", with: "shareddocuments://")
+            let url = URL(string: path)!
+
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+        }
+    }
+
     public var body: some View {
         ZStack(alignment: .top) {
 
@@ -77,6 +87,11 @@ public struct FileBrowserView: View {
                         }
                     }
                     .safeAreaPadding(EdgeInsets(top: 80, leading: 0, bottom: 0, trailing: 0))
+
+                    Button("Open Documents Folder", action: { openDocuments() })
+                        .font(.caption)
+                        .foregroundStyle(.gray)
+                        .padding()
                 }
 
                 HStack(spacing: 20) {
