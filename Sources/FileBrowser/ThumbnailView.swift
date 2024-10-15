@@ -18,7 +18,7 @@ struct ThumbnailView: View {
                     .cornerRadius(6)
                     .overlay(
                         RoundedRectangle(cornerRadius: 6)
-                            .stroke(Color("BrowserThumbnailBorder"), lineWidth: 1)
+                            .stroke(Color("BrowserThumbnailBorder", bundle: Bundle.module), lineWidth: 1)
                     )
                 #else
                 Image(nsImage: image)

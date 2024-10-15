@@ -108,7 +108,7 @@ public struct FileBrowserView: View {
 
             }
         }
-        .background(Color("BrowserBackground"))
+        .background(Color("BrowserBackground", bundle: Bundle.module))
         .foregroundStyle(.white)
         .alert("Are you sure?", isPresented: $showDeleteAlert) {
             Button("Delete", role: .destructive) { deleteSelected() }
