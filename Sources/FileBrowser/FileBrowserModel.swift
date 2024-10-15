@@ -13,21 +13,23 @@ class FileBrowserModel {
     let pathExtension: String
     let utType: UTType
     let newDocumentURL: URL
+    let exclude: [String]
 
     enum Error: Swift.Error {
         case noDocumentsDirectory
     }
 
-    init(utType: UTType, pathExtension: String, newDocumentURL: URL) {
+    init(utType: UTType, pathExtension: String, newDocumentURL: URL, exclude: [String]) {
         self.utType = utType
         self.pathExtension = pathExtension
         self.newDocumentURL = newDocumentURL
+        self.exclude = exclude
         scan()
     }
 
     func scan() {
 
-        guard let docsDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+        guard let docsDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.standardizedFileURL else {
             print("⚠️ couldn't get documents directory")
             return
         }
@@ -35,9 +37,20 @@ class FileBrowserModel {
         urls = []
 
         let mgr = FileManager.default
-        let enumerator = mgr.enumerator(at: docsDir, includingPropertiesForKeys: nil)
+        guard let enumerator = mgr.enumerator(at: docsDir, includingPropertiesForKeys: nil) else {
+            print("⚠️ couldn't get directory enumerator")
+            return
+        }
 
-        while let url = enumerator?.nextObject() as? URL {
+        let excludeURLs = exclude.map { docsDir.appendingPathComponent($0, isDirectory: true) }
+
+        while let url = enumerator.nextObject() as? URL {
+
+            if excludeURLs.contains(url.standardizedFileURL) {
+                enumerator.skipDescendants()
+                continue
+            }
+
             if url.pathExtension == pathExtension {
                 urls.append(url)
             }

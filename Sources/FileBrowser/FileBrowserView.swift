@@ -12,17 +12,19 @@ public struct FileBrowserView: View {
     let pathExtension: String
     let newDocumentURL: URL
     let thumbnailName: String?
+    let exclude: [String]
 
     @State private var model: FileBrowserModel?
     @State private var isImporting = false
     @State private var showDeleteAlert = false
 
-    public init(editing: Binding<URL?>, utType: UTType, pathExtension: String, newDocumentURL: URL, thumbnailName: String? = nil) {
+    public init(editing: Binding<URL?>, utType: UTType, pathExtension: String, newDocumentURL: URL, thumbnailName: String? = nil, exclude: [String] = []) {
         _editing = editing
         self.utType = utType
         self.pathExtension = pathExtension
         self.newDocumentURL = newDocumentURL
         self.thumbnailName = thumbnailName
+        self.exclude = exclude
     }
 
     let columns = [
@@ -140,7 +142,10 @@ public struct FileBrowserView: View {
             }
         }
         .onAppear {
-            model = FileBrowserModel(utType: utType, pathExtension: pathExtension, newDocumentURL: newDocumentURL)
+            model = FileBrowserModel(utType: utType,
+                                     pathExtension: pathExtension,
+                                     newDocumentURL: newDocumentURL,
+                                     exclude: exclude)
         }
     }
 }
