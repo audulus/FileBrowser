@@ -44,8 +44,6 @@ class FileBrowserModel {
         }
 
         urls.sort(by: { $0.lastPathComponent < $1.lastPathComponent} )
-
-        print("urls: \(urls)")
     }
 
     func rename(url: URL, to: String) throws {
