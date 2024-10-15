@@ -7,6 +7,7 @@ struct BrowserItemView: View {
     var model: FileBrowserModel
     let item: URL
     var itemSelected: (URL) -> Void
+    var thumbnailName: String?
     @State var renaming = false
     @State var newName = ""
 
@@ -42,7 +43,7 @@ struct BrowserItemView: View {
         @Bindable var model = model
         VStack {
             ZStack(alignment: .bottomLeading) {
-                ThumbnailView(url: item)
+                ThumbnailView(url: item, thumbnailName: thumbnailName)
                     .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 0)
                     .onTapGesture {
                         tap()

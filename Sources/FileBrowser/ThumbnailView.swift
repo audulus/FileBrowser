@@ -5,6 +5,7 @@ import SwiftUI
 /// View for a thumbnail loaded by QLThumbnailGenerator.
 struct ThumbnailView: View {
     var url: URL
+    var thumbnailName: String?
     @StateObject private var loader = ThumbnailLoader()
 
     var body: some View {
@@ -32,6 +33,8 @@ struct ThumbnailView: View {
                     .cornerRadius(4)
             }
         }
-        .onAppear { loader.load(url: url) }
+        .onAppear {
+            loader.load(url: url, thumbnailName: thumbnailName)
+        }
     }
 }

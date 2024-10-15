@@ -11,16 +11,18 @@ public struct FileBrowserView: View {
     let utType: UTType
     let pathExtension: String
     let newDocumentURL: URL
+    let thumbnailName: String?
 
     @State private var model: FileBrowserModel?
     @State private var isImporting = false
     @State private var showDeleteAlert = false
 
-    public init(editing: Binding<URL?>, utType: UTType, pathExtension: String, newDocumentURL: URL) {
+    public init(editing: Binding<URL?>, utType: UTType, pathExtension: String, newDocumentURL: URL, thumbnailName: String? = nil) {
         _editing = editing
         self.utType = utType
         self.pathExtension = pathExtension
         self.newDocumentURL = newDocumentURL
+        self.thumbnailName = thumbnailName
     }
 
     let columns = [
@@ -69,7 +71,8 @@ public struct FileBrowserView: View {
                         ForEach(model.urls, id: \.self) { url in
                             BrowserItemView(model: model,
                                             item: url,
-                                            itemSelected: select)
+                                            itemSelected: select,
+                                            thumbnailName: thumbnailName)
                             .padding(40)
                         }
                     }
@@ -153,7 +156,10 @@ struct BlurView: UIViewRepresentable {
 }
 
 #Preview {
-    FileBrowserView(editing: .constant(nil), utType: UTType.png, pathExtension: "png", newDocumentURL: URL(fileURLWithPath: "/tmp/test.png"))
+    FileBrowserView(editing: .constant(nil),
+                    utType: UTType.png,
+                    pathExtension: "png",
+                    newDocumentURL: URL(fileURLWithPath: "/tmp/test.png"))
 }
 
 #endif

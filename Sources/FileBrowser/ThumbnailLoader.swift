@@ -14,61 +14,65 @@ final class ThumbnailLoader: ObservableObject {
     #endif
 
     var loadingTask = Task { }
-    let thumbnailName = "thumbnail.png"
 
-    func load(url: URL) {
-
-        //let thumbnailSize: CGSize = CGSize(width: 200, height: 200)
-        //let thumbnailScale:CGFloat = 3.0 // UIScreen.main.scale
+    func load(url: URL, thumbnailName: String?) {
 
         // Cancel any in-progress task.
         loadingTask.cancel()
 
+        let thumbnailScale: CGFloat = UIScreen.main.scale
+
         loadingTask = Task.detached {
 
-            /*
-            // Create the thumbnail request.
-            let thumbnailRequest = QLThumbnailGenerator.Request(fileAt: url,
-                                                                size: thumbnailSize,
-                                                                scale: thumbnailScale,
-                                                                representationTypes: .thumbnail)
+            if let thumbnailName {
 
-            do {
-                let thumbnail = try await QLThumbnailGenerator.shared.generateBestRepresentation(for: thumbnailRequest)
-                let image = thumbnail.cgImage
-                try await MainActor.run {
+                print("💬 getting thumbnail for \(url.lastPathComponent)")
 
-                    try Task.checkCancellation()
+                let thumbURL = url.appendingPathComponent(thumbnailName, conformingTo: .png)
+
+                do {
+                    let data = try Data(contentsOf: thumbURL)
+
+                    Task { @MainActor in
 #if os(iOS)
-                    self.image = UIImage(cgImage: image)
+                        self.image = UIImage(data: data)
 #else
-                    self.image = NSImage(cgImage: image, size: CGSize(width: image.width, height: image.height))
+                        self.image = NSImage(data: data)
 #endif
+                    }
+
+                } catch {
+                    print("error loading thumbnail: \(error)")
                 }
 
-            } catch let error {
-                print("error generating thumbnail for \"\(url.lastPathComponent)\": \(error)")
-            }
-            */
+            } else {
 
-            print("💬 getting thumbnail for \(url.lastPathComponent)")
+                let thumbnailSize: CGSize = CGSize(width: 200, height: 200)
 
-            let thumbURL = url.appendingPathComponent(self.thumbnailName, conformingTo: .png)
+                // Create the thumbnail request.
+                let thumbnailRequest = QLThumbnailGenerator.Request(fileAt: url,
+                                                                    size: thumbnailSize,
+                                                                    scale: thumbnailScale,
+                                                                    representationTypes: .thumbnail)
 
-            do {
-                let data = try Data(contentsOf: thumbURL)
+                do {
+                    let thumbnail = try await QLThumbnailGenerator.shared.generateBestRepresentation(for: thumbnailRequest)
+                    let image = thumbnail.cgImage
+                    try await MainActor.run {
 
-                Task { @MainActor in
+                        try Task.checkCancellation()
 #if os(iOS)
-                    self.image = UIImage(data: data)
+                        self.image = UIImage(cgImage: image)
 #else
-                    self.image = NSImage(data: data)
+                        self.image = NSImage(cgImage: image, size: CGSize(width: image.width, height: image.height))
 #endif
-                }
+                    }
 
-            } catch {
-                print("error loading thumbnail: \(error)")
+                } catch let error {
+                    print("error generating thumbnail for \"\(url.lastPathComponent)\": \(error)")
+                }
             }
+
         }
     }
 }
