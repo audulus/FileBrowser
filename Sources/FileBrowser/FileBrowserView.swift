@@ -13,18 +13,20 @@ public struct FileBrowserView: View {
     let newDocumentURL: URL
     let thumbnailName: String?
     let exclude: [String]
+    let showSettings: () -> Void
 
     @State private var model: FileBrowserModel?
     @State private var isImporting = false
     @State private var showDeleteAlert = false
 
-    public init(editing: Binding<URL?>, utType: UTType, pathExtension: String, newDocumentURL: URL, thumbnailName: String? = nil, exclude: [String] = []) {
+    public init(editing: Binding<URL?>, utType: UTType, pathExtension: String, newDocumentURL: URL, thumbnailName: String? = nil, exclude: [String] = [], showSettings: @escaping () -> Void) {
         _editing = editing
         self.utType = utType
         self.pathExtension = pathExtension
         self.newDocumentURL = newDocumentURL
         self.thumbnailName = thumbnailName
         self.exclude = exclude
+        self.showSettings = showSettings
     }
 
     let columns = [
@@ -91,6 +93,11 @@ public struct FileBrowserView: View {
                     .safeAreaPadding(EdgeInsets(top: 80, leading: 0, bottom: 0, trailing: 0))
 
                     Button("Open Documents Folder", action: { openDocuments() })
+                        .font(.caption)
+                        .foregroundStyle(.gray)
+                        .padding()
+
+                    Button("Settings", action: showSettings)
                         .font(.caption)
                         .foregroundStyle(.gray)
                         .padding()
@@ -179,7 +186,8 @@ struct BlurView: UIViewRepresentable {
     FileBrowserView(editing: .constant(nil),
                     utType: UTType.png,
                     pathExtension: "png",
-                    newDocumentURL: URL(fileURLWithPath: "/tmp/test.png"))
+                    newDocumentURL: URL(fileURLWithPath: "/tmp/test.png"),
+                    showSettings: {})
 }
 
 #endif
