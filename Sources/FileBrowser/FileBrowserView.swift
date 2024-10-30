@@ -7,10 +7,10 @@ import UniformTypeIdentifiers
 
 public struct FileBrowserView: View {
 
-    @Binding var editing: URL?
     let utType: UTType
     let pathExtension: String
     let newDocumentURL: URL
+    let documentSelected: (URL) -> Void
     let thumbnailName: String?
     let exclude: [String]
     let showSettings: () -> Void
@@ -19,11 +19,17 @@ public struct FileBrowserView: View {
     @State private var isImporting = false
     @State private var showDeleteAlert = false
 
-    public init(editing: Binding<URL?>, utType: UTType, pathExtension: String, newDocumentURL: URL, thumbnailName: String? = nil, exclude: [String] = [], showSettings: @escaping () -> Void) {
-        _editing = editing
+    public init(utType: UTType,
+                pathExtension: String,
+                newDocumentURL: URL,
+                documentSelected: @escaping (URL) -> Void,
+                thumbnailName: String? = nil,
+                exclude: [String] = [],
+                showSettings: @escaping () -> Void) {
         self.utType = utType
         self.pathExtension = pathExtension
         self.newDocumentURL = newDocumentURL
+        self.documentSelected = documentSelected
         self.thumbnailName = thumbnailName
         self.exclude = exclude
         self.showSettings = showSettings
@@ -39,10 +45,6 @@ public struct FileBrowserView: View {
         } catch {
             print("⚠️ error creating new document: \(error)")
         }
-    }
-
-    func select(url: URL) {
-        editing = url
     }
 
     func deleteSelected() {
@@ -85,7 +87,7 @@ public struct FileBrowserView: View {
                         ForEach(model.urls, id: \.self) { url in
                             BrowserItemView(model: model,
                                             item: url,
-                                            itemSelected: select,
+                                            itemSelected: documentSelected,
                                             thumbnailName: thumbnailName)
                             .padding(40)
                         }
@@ -183,10 +185,10 @@ struct BlurView: UIViewRepresentable {
 }
 
 #Preview {
-    FileBrowserView(editing: .constant(nil),
-                    utType: UTType.png,
+    FileBrowserView(utType: UTType.png,
                     pathExtension: "png",
                     newDocumentURL: URL(fileURLWithPath: "/tmp/test.png"),
+                    documentSelected: { _ in},
                     showSettings: {})
 }
 
