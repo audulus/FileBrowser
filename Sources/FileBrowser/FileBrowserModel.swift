@@ -24,7 +24,67 @@ class FileBrowserModel {
         self.pathExtension = pathExtension
         self.newDocumentURL = newDocumentURL
         self.exclude = exclude
+
         scan()
+        startMonitoring()
+    }
+
+    deinit {
+        stopMonitoring()
+    }
+
+    private var directoryFileDescriptor: CInt = -1
+    private var source: DispatchSourceFileSystemObject?
+
+    func startMonitoring() {
+        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+
+        // Open the directory to get a file descriptor.
+        directoryFileDescriptor = open(documentsURL.path, O_EVTONLY)
+        guard directoryFileDescriptor >= 0 else {
+            print("Failed to open directory.")
+            return
+        }
+
+        // Create the dispatch source.
+        source = DispatchSource.makeFileSystemObjectSource(
+            fileDescriptor: directoryFileDescriptor,
+            eventMask: [.write, .delete, .rename],
+            queue: DispatchQueue.global()
+        )
+
+        // Set the event handler.
+        source?.setEventHandler { [weak self] in
+            guard let self = self else { return }
+
+            // Handle the event.
+            let flags = self.source?.data ?? []
+            if flags.contains(.write) {
+                print("File added or modified in documents directory.")
+            }
+            if flags.contains(.delete) {
+                print("File removed from documents directory.")
+            }
+            if flags.contains(.rename) {
+                print("File renamed in documents directory.")
+            }
+            scan()
+        }
+
+        // Set the cancel handler to close the file descriptor.
+        source?.setCancelHandler { [weak self] in
+            guard let self = self else { return }
+            close(self.directoryFileDescriptor)
+            self.directoryFileDescriptor = -1
+        }
+
+        // Start monitoring.
+        source?.resume()
+    }
+
+    func stopMonitoring() {
+        source?.cancel()
+        source = nil
     }
 
     func scan() {
@@ -62,13 +122,11 @@ class FileBrowserModel {
     func rename(url: URL, to: String) throws {
         let mgr = FileManager.default
         try mgr.moveItem(at: url, to: url.deletingLastPathComponent().appendingPathComponent(to, conformingTo: utType))
-        scan()
     }
 
     func delete(url: URL) throws {
         let mgr = FileManager.default
         try mgr.removeItem(at: url)
-        scan()
     }
 
     func deleteSelected() throws {
@@ -77,7 +135,6 @@ class FileBrowserModel {
             try mgr.removeItem(at: url)
         }
         selected = []
-        scan()
     }
 
     func duplicateSelected() throws {
@@ -87,8 +144,6 @@ class FileBrowserModel {
             let destUrl = try getFileURL(base: url.deletingPathExtension().lastPathComponent)
             try mgr.copyItem(at: url, to: destUrl)
         }
-
-        scan()
     }
 
     func getFileURL(base: String) throws -> URL  {
@@ -114,8 +169,6 @@ class FileBrowserModel {
         let mgr = FileManager.default
         let destUrl = try getFileURL(base: "Untitled")
         try mgr.copyItem(at: newDocumentURL, to: destUrl)
-
-        scan()
     }
 
     func importFile(at url: URL) {
@@ -139,7 +192,5 @@ class FileBrowserModel {
 
         // release access
         url.stopAccessingSecurityScopedResource()
-
-        scan()
     }
 }
