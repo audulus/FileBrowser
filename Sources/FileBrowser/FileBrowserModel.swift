@@ -5,7 +5,9 @@ import Observation
 import UniformTypeIdentifiers
 
 @Observable
-class FileBrowserModel {
+class FileBrowserModel: @unchecked Sendable {
+
+    // See https://forums.swift.org/t/dispatchsource-crash-under-swift-6/75951
 
     var urls: [URL] = []
     var selected = Set<URL>()
@@ -19,7 +21,6 @@ class FileBrowserModel {
         case noDocumentsDirectory
     }
 
-    @MainActor
     init(utType: UTType, pathExtension: String, newDocumentURL: URL, exclude: [String]) {
         self.utType = utType
         self.pathExtension = pathExtension
@@ -37,7 +38,6 @@ class FileBrowserModel {
     private var directoryFileDescriptor: CInt = -1
     private var source: DispatchSourceFileSystemObject?
 
-    @MainActor
     func startMonitoring() {
         let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
 
@@ -58,29 +58,18 @@ class FileBrowserModel {
         // Set the event handler.
         source?.setEventHandler { [weak self] in
             guard let self = self else { return }
-
-            // Handle the event.
-            let flags = self.source?.data ?? []
-            if flags.contains(.write) {
-                print("File added or modified in documents directory.")
-            }
-            if flags.contains(.delete) {
-                print("File removed from documents directory.")
-            }
-            if flags.contains(.rename) {
-                print("File renamed in documents directory.")
-            }
-
-            Task { @MainActor in
-                scan()
+            // Trouble making this work using Task:
+            // https://forums.swift.org/t/dispatchsource-crash-under-swift-6/75951
+            DispatchQueue.main.async {
+                self.scan()
             }
         }
 
+        let fd = directoryFileDescriptor
+
         // Set the cancel handler to close the file descriptor.
-        source?.setCancelHandler { [weak self] in
-            guard let self = self else { return }
-            close(self.directoryFileDescriptor)
-            self.directoryFileDescriptor = -1
+        source?.setCancelHandler {
+            close(fd)
         }
 
         // Start monitoring.
