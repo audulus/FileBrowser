@@ -19,6 +19,7 @@ class FileBrowserModel {
         case noDocumentsDirectory
     }
 
+    @MainActor
     init(utType: UTType, pathExtension: String, newDocumentURL: URL, exclude: [String]) {
         self.utType = utType
         self.pathExtension = pathExtension
@@ -36,6 +37,7 @@ class FileBrowserModel {
     private var directoryFileDescriptor: CInt = -1
     private var source: DispatchSourceFileSystemObject?
 
+    @MainActor
     func startMonitoring() {
         let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
 
@@ -68,7 +70,10 @@ class FileBrowserModel {
             if flags.contains(.rename) {
                 print("File renamed in documents directory.")
             }
-            scan()
+
+            Task { @MainActor in
+                scan()
+            }
         }
 
         // Set the cancel handler to close the file descriptor.
