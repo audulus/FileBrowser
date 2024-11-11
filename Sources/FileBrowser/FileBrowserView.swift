@@ -14,9 +14,9 @@ public struct FileBrowserView: View {
     let thumbnailName: String?
     let exclude: [String]
     let showSettings: () -> Void
+    let doImport: () -> Void
 
     @State private var model: FileBrowserModel?
-    @State private var isImporting = false
     @State private var showDeleteAlert = false
 
     public init(utType: UTType,
@@ -25,7 +25,8 @@ public struct FileBrowserView: View {
                 documentSelected: @escaping (URL) -> Void,
                 thumbnailName: String? = nil,
                 exclude: [String] = [],
-                showSettings: @escaping () -> Void) {
+                showSettings: @escaping () -> Void,
+                doImport: @escaping () -> Void) {
         self.utType = utType
         self.pathExtension = pathExtension
         self.newDocumentURL = newDocumentURL
@@ -33,6 +34,7 @@ public struct FileBrowserView: View {
         self.thumbnailName = thumbnailName
         self.exclude = exclude
         self.showSettings = showSettings
+        self.doImport = doImport
     }
 
     let columns = [
@@ -123,7 +125,7 @@ public struct FileBrowserView: View {
                         Button(action: { model.selecting = true }) {
                             Text("Select")
                         }
-                        Button(action: { isImporting = true}) {
+                        Button(action: doImport) {
                             Text("Import")
                         }
                         CustomToolbarButton(image: Image(systemName: "plus"), action: newDocument)
@@ -139,16 +141,6 @@ public struct FileBrowserView: View {
         .alert("Are you sure?", isPresented: $showDeleteAlert) {
             Button("Delete", role: .destructive) { deleteSelected() }
             Button("Cancel", role: .cancel) { }
-        }
-        .fileImporter(isPresented: $isImporting,
-                      allowedContentTypes: [utType]) { result in
-            switch result {
-            case .success(let url):
-                model?.importFile(at: url)
-            case .failure(let error):
-                // handle error
-                print(error)
-            }
         }
         .onAppear {
             model = FileBrowserModel(utType: utType,
@@ -189,7 +181,8 @@ struct BlurView: UIViewRepresentable {
                     pathExtension: "png",
                     newDocumentURL: URL(fileURLWithPath: "/tmp/test.png"),
                     documentSelected: { _ in},
-                    showSettings: {})
+                    showSettings: {},
+                    doImport: {})
 }
 
 #endif
