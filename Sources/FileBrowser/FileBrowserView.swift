@@ -15,6 +15,7 @@ public struct FileBrowserView: View {
     let exclude: [String]
     let showSettings: () -> Void
     let doImport: () -> Void
+    let showIntro: () -> Void
 
     @State private var model: FileBrowserModel?
     @State private var showDeleteAlert = false
@@ -26,7 +27,8 @@ public struct FileBrowserView: View {
                 thumbnailName: String? = nil,
                 exclude: [String] = [],
                 showSettings: @escaping () -> Void,
-                doImport: @escaping () -> Void) {
+                doImport: @escaping () -> Void,
+                showIntro: @escaping () -> Void) {
         self.utType = utType
         self.pathExtension = pathExtension
         self.newDocumentURL = newDocumentURL
@@ -35,6 +37,7 @@ public struct FileBrowserView: View {
         self.exclude = exclude
         self.showSettings = showSettings
         self.doImport = doImport
+        self.showIntro = showIntro
     }
 
     let columns = [
@@ -96,15 +99,34 @@ public struct FileBrowserView: View {
                     }
                     .safeAreaPadding(EdgeInsets(top: 80, leading: 0, bottom: 0, trailing: 0))
 
-                    Button("Open Documents Folder", action: { openDocuments() })
-                        .font(.caption)
-                        .foregroundStyle(.gray)
-                        .padding()
+                    HStack {
+                        Button(action: showIntro) {
+                            Text("Show Intro")
+                                .font(.caption)
+                                .padding()
+                                .background(
+                                    .thinMaterial,
+                                    in: RoundedRectangle(cornerRadius: 10))
+                        }
 
-                    Button("Settings", action: showSettings)
-                        .font(.caption)
-                        .foregroundStyle(.gray)
-                        .padding()
+                        Button(action: openDocuments) {
+                            Text("Open Documents Folder")
+                                .font(.caption)
+                                .padding()
+                                .background(
+                                    .thinMaterial,
+                                    in: RoundedRectangle(cornerRadius: 10))
+                        }
+
+                        Button(action: showSettings) {
+                            Text("Settings")
+                                .font(.caption)
+                                .padding()
+                                .background(
+                                    .thinMaterial,
+                                    in: RoundedRectangle(cornerRadius: 10))
+                        }
+                    }
                 }
 
                 HStack(spacing: 20) {
@@ -182,7 +204,8 @@ struct BlurView: UIViewRepresentable {
                     newDocumentURL: URL(fileURLWithPath: "/tmp/test.png"),
                     documentSelected: { _ in},
                     showSettings: {},
-                    doImport: {})
+                    doImport: {},
+                    showIntro: {})
 }
 
 #endif
