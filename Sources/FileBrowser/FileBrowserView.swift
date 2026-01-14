@@ -87,50 +87,48 @@ public struct FileBrowserView: View {
         ZStack(alignment: .top) {
 
             if let model {
-                ScrollViewReader { proxy in
-                    ScrollView {
-                        LazyVGrid(columns: columns) {
-                            ForEach(model.urls, id: \.self) { url in
-                                BrowserItemView(model: model,
-                                                item: url,
-                                                itemSelected: documentSelected,
-                                                thumbnailName: thumbnailName)
-                                .padding(40)
-                            }
+                ScrollView {
+                    LazyVGrid(columns: columns) {
+                        ForEach(model.urls, id: \.self) { url in
+                            BrowserItemView(model: model,
+                                            item: url,
+                                            itemSelected: documentSelected,
+                                            thumbnailName: thumbnailName)
+                            .padding(40)
                         }
-                        .safeAreaPadding(EdgeInsets(top: 80, leading: 0, bottom: 0, trailing: 0))
-                        
-                        HStack {
-                            Button(action: showIntro) {
-                                Text("Show Intro")
-                                    .font(.caption)
-                                    .padding()
-                                    .background(
-                                        .thinMaterial,
-                                        in: RoundedRectangle(cornerRadius: 10))
-                            }
-                            
-                            Button(action: openDocuments) {
-                                Text("Open Documents Folder")
-                                    .font(.caption)
-                                    .padding()
-                                    .background(
-                                        .thinMaterial,
-                                        in: RoundedRectangle(cornerRadius: 10))
-                            }
-                            
-                            Button(action: showSettings) {
-                                Text("Settings")
-                                    .font(.caption)
-                                    .padding()
-                                    .background(
-                                        .thinMaterial,
-                                        in: RoundedRectangle(cornerRadius: 10))
-                            }
+                    }
+                    .safeAreaPadding(EdgeInsets(top: 80, leading: 0, bottom: 0, trailing: 0))
+
+                    HStack {
+                        Button(action: showIntro) {
+                            Text("Show Intro")
+                                .font(.caption)
+                                .padding()
+                                .background(
+                                    .thinMaterial,
+                                    in: RoundedRectangle(cornerRadius: 10))
+                        }
+
+                        Button(action: openDocuments) {
+                            Text("Open Documents Folder")
+                                .font(.caption)
+                                .padding()
+                                .background(
+                                    .thinMaterial,
+                                    in: RoundedRectangle(cornerRadius: 10))
+                        }
+
+                        Button(action: showSettings) {
+                            Text("Settings")
+                                .font(.caption)
+                                .padding()
+                                .background(
+                                    .thinMaterial,
+                                    in: RoundedRectangle(cornerRadius: 10))
                         }
                     }
                 }
-                    
+
                 HStack(spacing: 20) {
                     if let appName = Bundle.main.infoDictionary?[kCFBundleNameKey as String] as? String {
                         Text(appName)
