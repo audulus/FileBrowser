@@ -133,37 +133,39 @@ public struct FileBrowserView: View {
     }
 
     public var body: some View {
-        ZStack(alignment: .top) {
-
-            documentsScrollView
+        ScrollViewReader { proxy in
+            ZStack(alignment: .top) {
                 
-            if let model {
-                HStack(spacing: 20) {
-                    if let appName = Bundle.main.infoDictionary?[kCFBundleNameKey as String] as? String {
-                        Text(appName)
-                            .font(.title)
+                documentsScrollView
+                
+                if let model {
+                    HStack(spacing: 20) {
+                        if let appName = Bundle.main.infoDictionary?[kCFBundleNameKey as String] as? String {
+                            Text(appName)
+                                .font(.title)
+                        }
+                        Spacer()
+                        if model.selecting {
+                            Button(action: duplicateSelected) {
+                                Text("Duplicate")
+                            }
+                            Button(action: { showDeleteAlert = true }) {
+                                Text("Delete")
+                            }
+                            CustomToolbarButton(image: Image(systemName: "multiply"), action: deactivateSelection)
+                        } else {
+                            Button(action: { model.selecting = true }) {
+                                Text("Select")
+                            }
+                            Button(action: doImport) {
+                                Text("Import")
+                            }
+                            CustomToolbarButton(image: Image(systemName: "plus"), action: newDocument)
+                        }
                     }
-                    Spacer()
-                    if model.selecting {
-                        Button(action: duplicateSelected) {
-                            Text("Duplicate")
-                        }
-                        Button(action: { showDeleteAlert = true }) {
-                            Text("Delete")
-                        }
-                        CustomToolbarButton(image: Image(systemName: "multiply"), action: deactivateSelection)
-                    } else {
-                        Button(action: { model.selecting = true }) {
-                            Text("Select")
-                        }
-                        Button(action: doImport) {
-                            Text("Import")
-                        }
-                        CustomToolbarButton(image: Image(systemName: "plus"), action: newDocument)
-                    }
+                    .padding()
+                    .background(BlurView(style: .dark))
                 }
-                .padding()
-                .background(BlurView(style: .dark))
             }
         }
         .background(Color("BrowserBackground", bundle: Bundle.module))
