@@ -159,10 +159,11 @@ class FileBrowserModel: @unchecked Sendable {
         return docsDir.appending(component: comp)
     }
 
-    func newDocument() throws {
+    func newDocument() throws -> URL {
         let mgr = FileManager.default
         let destUrl = try getFileURL(base: "Untitled")
         try mgr.copyItem(at: newDocumentURL, to: destUrl)
+        return destUrl
     }
 
     func importFile(at url: URL) {

@@ -44,9 +44,27 @@ public struct FileBrowserView: View {
         GridItem(.adaptive(minimum: 250))
     ]
 
-    func newDocument() {
+    func newDocument(proxy: ScrollViewProxy) {
+        
+        guard let model else { return }
+        
         do {
-            try model?.newDocument()
+            let url = try model.newDocument()
+            let filename = url.lastPathComponent
+            
+            Task {
+                
+                // Wait for reload of documents.
+                try await Task.sleep(for: .milliseconds(50))
+                
+                // Look up URL with the same filename (URLs are a different format
+                // than what is returned by newDocument.
+                if let matchingURL = model.urls.first(where: { $0.lastPathComponent == filename }) {
+                    withAnimation {
+                        proxy.scrollTo(matchingURL)
+                    }
+                }
+            }
         } catch {
             print("⚠️ error creating new document: \(error)")
         }
@@ -95,6 +113,7 @@ public struct FileBrowserView: View {
                                         itemSelected: documentSelected,
                                         thumbnailName: thumbnailName)
                         .padding(40)
+                        .id(url)
                     }
                 }
                 .safeAreaPadding(EdgeInsets(top: 80, leading: 0, bottom: 0, trailing: 0))
@@ -160,7 +179,7 @@ public struct FileBrowserView: View {
                             Button(action: doImport) {
                                 Text("Import")
                             }
-                            CustomToolbarButton(image: Image(systemName: "plus"), action: newDocument)
+                            CustomToolbarButton(image: Image(systemName: "plus"), action: { newDocument(proxy: proxy)})
                         }
                     }
                     .padding()
