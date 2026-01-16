@@ -12,6 +12,19 @@ struct BrowserItemView: View {
     @State var newName = ""
     @State var isOpening = false
 
+    func openItem() {
+        // Animate an increase in size to show it opening
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+            isOpening = true
+        }
+        
+        // Call itemSelected after a brief delay to let the animation play
+        Task {
+            try? await Task.sleep(for: .milliseconds(150))
+            itemSelected(item)
+        }
+    }
+
     func tap() {
         if model.selecting {
             if selected {
@@ -20,15 +33,7 @@ struct BrowserItemView: View {
                 model.selected.insert(item)
             }
         } else {
-            // Animate an increase in size to show it opening
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                isOpening = true
-            }
-            
-            // Call itemSelected after a brief delay to let the animation play
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                itemSelected(item)
-            }
+            openItem()
         }
     }
 
@@ -81,6 +86,17 @@ struct BrowserItemView: View {
         .opacity(isOpening ? 0.8 : 1.0)
         .onAppear {
             newName = name
+            isOpening = false
+        }
+        .onChange(of: model.urlToOpen) { oldValue, newValue in
+            if newValue == item {
+                openItem()
+                // Reset the trigger after handling
+                Task {
+                    try? await Task.sleep(for: .milliseconds(200))
+                    model.urlToOpen = nil
+                }
+            }
         }
     }
 

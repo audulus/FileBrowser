@@ -66,7 +66,8 @@ public struct FileBrowserView: View {
                     
                     try await Task.sleep(for: .seconds(1))
                     
-                    documentSelected(matchingURL)
+                    // Trigger the opening animation by setting urlToOpen
+                    model.urlToOpen = matchingURL
                 }
             }
         } catch {

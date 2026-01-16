@@ -12,6 +12,7 @@ class FileBrowserModel: @unchecked Sendable {
     var urls: [URL] = []
     var selected = Set<URL>()
     var selecting = false
+    var urlToOpen: URL? = nil  // Used to trigger programmatic opening animation
     let pathExtension: String
     let utType: UTType
     let newDocumentURL: URL
