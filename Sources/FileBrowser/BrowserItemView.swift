@@ -10,6 +10,7 @@ struct BrowserItemView: View {
     var thumbnailName: String?
     @State var renaming = false
     @State var newName = ""
+    @State var isOpening = false
 
     func tap() {
         if model.selecting {
@@ -19,7 +20,15 @@ struct BrowserItemView: View {
                 model.selected.insert(item)
             }
         } else {
-            itemSelected(item)
+            // Animate an increase in size to show it opening
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                isOpening = true
+            }
+            
+            // Call itemSelected after a brief delay to let the animation play
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                itemSelected(item)
+            }
         }
     }
 
@@ -68,6 +77,8 @@ struct BrowserItemView: View {
                 Spacer()
             }.padding(.top)
         }
+        .scaleEffect(isOpening ? 1.2 : 1.0)
+        .opacity(isOpening ? 0.8 : 1.0)
         .onAppear {
             newName = name
         }
