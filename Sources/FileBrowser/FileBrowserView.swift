@@ -63,6 +63,10 @@ public struct FileBrowserView: View {
                     withAnimation {
                         proxy.scrollTo(matchingURL)
                     }
+                    
+                    try await Task.sleep(for: .seconds(1))
+                    
+                    documentSelected(matchingURL)
                 }
             }
         } catch {
