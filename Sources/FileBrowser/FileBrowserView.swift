@@ -16,6 +16,7 @@ public struct FileBrowserView: View {
     let showSettings: () -> Void
     let doImport: () -> Void
     let showIntro: () -> Void
+    let closingURL: URL?
 
     @State private var model: FileBrowserModel?
     @State private var showDeleteAlert = false
@@ -28,7 +29,8 @@ public struct FileBrowserView: View {
                 exclude: [String] = [],
                 showSettings: @escaping () -> Void,
                 doImport: @escaping () -> Void,
-                showIntro: @escaping () -> Void) {
+                showIntro: @escaping () -> Void,
+                closingURL: URL?) {
         self.utType = utType
         self.pathExtension = pathExtension
         self.newDocumentURL = newDocumentURL
@@ -38,6 +40,7 @@ public struct FileBrowserView: View {
         self.showSettings = showSettings
         self.doImport = doImport
         self.showIntro = showIntro
+        self.closingURL = closingURL
     }
 
     let columns = [
@@ -203,6 +206,7 @@ public struct FileBrowserView: View {
                                      pathExtension: pathExtension,
                                      newDocumentURL: newDocumentURL,
                                      exclude: exclude)
+            model?.urlToClose = closingURL
         }
     }
 }
@@ -239,7 +243,8 @@ struct BlurView: UIViewRepresentable {
                     documentSelected: { _ in},
                     showSettings: {},
                     doImport: {},
-                    showIntro: {})
+                    showIntro: {},
+                    closingURL: nil)
 }
 
 #endif
