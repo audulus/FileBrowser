@@ -13,7 +13,7 @@ struct BrowserItemView: View {
 
     func openItem() {
         // Call itemSelected after a brief delay to let the animation play
-        model.urlToOpen = item
+        model.openURL = item
         Task {
             try? await Task.sleep(for: .seconds(1))
             itemSelected(item)
@@ -49,7 +49,7 @@ struct BrowserItemView: View {
     }
     
     var enlarge: Bool {
-        model.urlToOpen == item || model.urlToClose == item
+        model.openURL == item
     }
 
     var body: some View {

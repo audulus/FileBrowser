@@ -16,7 +16,7 @@ public struct FileBrowserView: View {
     let showSettings: () -> Void
     let doImport: () -> Void
     let showIntro: () -> Void
-    let closingURL: URL?
+    let openURL: URL?
 
     @State private var model: FileBrowserModel?
     @State private var showDeleteAlert = false
@@ -30,7 +30,7 @@ public struct FileBrowserView: View {
                 showSettings: @escaping () -> Void,
                 doImport: @escaping () -> Void,
                 showIntro: @escaping () -> Void,
-                closingURL: URL?) {
+                openURL: URL?) {
         self.utType = utType
         self.pathExtension = pathExtension
         self.newDocumentURL = newDocumentURL
@@ -40,7 +40,7 @@ public struct FileBrowserView: View {
         self.showSettings = showSettings
         self.doImport = doImport
         self.showIntro = showIntro
-        self.closingURL = closingURL
+        self.openURL = openURL
     }
 
     let columns = [
@@ -70,7 +70,7 @@ public struct FileBrowserView: View {
                     try await Task.sleep(for: .seconds(1))
                     
                     // Trigger the opening animation by setting urlToOpen
-                    model.urlToOpen = matchingURL
+                    model.openURL = openURL
                 }
             }
         } catch {
@@ -206,7 +206,12 @@ public struct FileBrowserView: View {
                                      pathExtension: pathExtension,
                                      newDocumentURL: newDocumentURL,
                                      exclude: exclude)
-            model?.urlToClose = closingURL
+            model?.openURL = openURL
+            
+            Task {
+                try await Task.sleep(for: .seconds(1))
+                model?.openURL = nil
+            }
         }
     }
 }
@@ -244,7 +249,7 @@ struct BlurView: UIViewRepresentable {
                     showSettings: {},
                     doImport: {},
                     showIntro: {},
-                    closingURL: nil)
+                    openURL: nil)
 }
 
 #endif
