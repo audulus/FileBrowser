@@ -207,11 +207,9 @@ public struct FileBrowserView: View {
                                      newDocumentURL: newDocumentURL,
                                      exclude: exclude)
             model?.openURL = openURL
-            
-            Task {
-                try await Task.sleep(for: .seconds(1))
-                model?.openURL = nil
-            }
+        }
+        .onChange(of: openURL, initial: true) {
+            model?.openURL = openURL
         }
     }
 }
