@@ -3,6 +3,9 @@
 import Foundation
 import QuickLookThumbnailing
 import SwiftUI
+#if os(macOS)
+import AppKit
+#endif
 
 /// Data model for thumbnails with async loading.
 @MainActor
@@ -20,7 +23,11 @@ final class ThumbnailLoader: ObservableObject {
         // Cancel any in-progress task.
         loadingTask.cancel()
 
+        #if os(iOS)
         let thumbnailScale: CGFloat = UIScreen.main.scale
+        #else
+        let thumbnailScale: CGFloat = NSScreen.main?.backingScaleFactor ?? 2
+        #endif
 
         loadingTask = Task.detached {
 

@@ -62,17 +62,17 @@ public struct FileBrowserView: View {
                 
                 // Look up URL with the same filename (URLs are a different format
                 // than what is returned by newDocument.
-                if let matchingURL = model.urls.first(where: { $0.lastPathComponent == filename }) {
+                if let matchingItem = model.items.first(where: { $0.url.lastPathComponent == filename }) {
                     withAnimation {
-                        proxy.scrollTo(matchingURL)
+                        proxy.scrollTo(matchingItem.id)
                     }
                     
                     try await Task.sleep(for: .seconds(1))
                     
                     // Trigger the opening animation
-                    model.openURL = matchingURL
+                    model.openURL = matchingItem.url
                     try? await Task.sleep(for: .seconds(1))
-                    documentSelected(matchingURL)
+                    documentSelected(matchingItem.url)
                 }
             }
         } catch {
@@ -93,6 +93,22 @@ public struct FileBrowserView: View {
             try model?.duplicateSelected()
         } catch {
             print("⚠️ error duplicating selected items: \(error)")
+        }
+    }
+
+    func groupSelected() {
+        do {
+            try model?.groupSelected()
+        } catch {
+            print("⚠️ error grouping selected items: \(error)")
+        }
+    }
+
+    func ungroupSelected() {
+        do {
+            try model?.ungroupSelected()
+        } catch {
+            print("⚠️ error ungrouping selected items: \(error)")
         }
     }
 
@@ -117,13 +133,13 @@ public struct FileBrowserView: View {
             if let model {
                 
                 LazyVGrid(columns: columns) {
-                    ForEach(model.urls, id: \.self) { url in
+                    ForEach(model.items) { item in
                         BrowserItemView(model: model,
-                                        item: url,
+                                        item: item,
                                         itemSelected: documentSelected,
                                         thumbnailName: thumbnailName)
                         .padding(40)
-                        .id(url)
+                        .id(item.id)
                     }
                 }
                 .safeAreaPadding(EdgeInsets(top: 80, leading: 0, bottom: 0, trailing: 0))
@@ -169,12 +185,24 @@ public struct FileBrowserView: View {
                 
                 if let model {
                     HStack(spacing: 20) {
-                        if let appName = Bundle.main.infoDictionary?[kCFBundleNameKey as String] as? String {
-                            Text(appName)
+                        if model.isInGroup {
+                            CustomToolbarButton(image: Image(systemName: "chevron.left"), action: model.leaveGroup)
+                        }
+                        let appName = Bundle.main.infoDictionary?[kCFBundleNameKey as String] as? String
+                        if let title = model.currentGroupName ?? appName {
+                            Text(title)
                                 .font(.title)
                         }
                         Spacer()
                         if model.selecting {
+                            Button(action: ungroupSelected) {
+                                Text("Ungroup")
+                            }
+                            .disabled(!model.canUngroupSelected)
+                            Button(action: groupSelected) {
+                                Text("Group")
+                            }
+                            .disabled(!model.canGroupSelected)
                             Button(action: duplicateSelected) {
                                 Text("Duplicate")
                             }
